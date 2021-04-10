@@ -1,33 +1,72 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script>
-        // TogetherJS configuration would go here, but we'll talk about that
-        // later
-      </script>
-      <script src="https://togetherjs.com/togetherjs-min.js"></script>
-      <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-    <title>Document</title>
+	<title>TogetherJS Test</title>
+    <link rel="stylesheet" href="lib/codemirror.css">
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
 </head>
 <body>
+
     <div id="editor">
         <p>Hello World!</p>
         <p>Some initial <strong>bold</strong> text</p>
         <p><br></p>
-      </div>
-    <button id="start-togetherjs" type="button"
- onclick="TogetherJS(this); return false"
- data-end-togetherjs-html="End TogetherJS">
-  Start TogetherJS
-</button>
-<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
-<script>
-    var quill = new Quill('#editor', {
-      theme: 'snow'
-    });
-  </script>
+    </div>
+    <canvas width="450px" height="450px" id="myCanvas"></canvas>
+
+    <button onclick="TogetherJS(this); return false;">Start TogetherJS</button>
+    <button onclick="start()">Start Capture</button>
+    <button onclick="stop()">Save Capture</button>
+    <script src="https://togetherjs.com/togetherjs-min.js"></script>
+    <script src="lib/codemirror.js"></script>
+    <script src="CCapture.min.js"></script>
+    <script src="whammy.js"></script>
+    <script src="download.js"></script>
+    <script>
+        var myTextarea = document.getElementById('text');
+        var editor = CodeMirror.fromTextArea(myTextarea, {
+            lineNumbers: true
+        });
+    </script>
+    <script>
+          var quill = new Quill('#editor', {
+            theme: 'snow'
+        });
+        var capturer = new CCapture( { format: 'webm' }  );
+        var mainCanvas = document.getElementById("myCanvas");
+		var mainContext = mainCanvas.getContext('2d');
+		var canvasWidth = 450;
+		var canvasHeight = 450;
+
+		var angle = 0;
+
+		var requestAnimationFrame = window.requestAnimationFrame ||
+									window.mozRequestAnimationFrame ||
+									window.webkitRequestAnimationFrame ||
+									window.msRequestAnimationFrame;
+
+        function start () {
+            capturer.start();
+        }
+        function stop () {
+            capturer.stop();
+            capturer.save();
+        }
+		(function drawCircle() {
+			mainContext.clearRect(0, 0, canvasWidth, canvasHeight);
+			mainContext.fillStyle = "#EEEEEE";
+			mainContext.fillRect(0, 0, canvasWidth, canvasHeight);
+			mainContext.beginPath();
+			var radius = 25 + 150 * Math.abs(Math.cos(angle));
+			mainContext.arc(225, 225, radius, 0, Math.PI * 2, false);
+			mainContext.closePath();
+			mainContext.fillStyle = "#000000";
+			mainContext.fill();
+			angle += Math.PI / 200;
+			requestAnimationFrame(drawCircle);
+            capturer.capture(mainCanvas);
+		})();
+    </script>
 </body>
 </html>
